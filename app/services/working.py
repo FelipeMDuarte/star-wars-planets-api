@@ -8,7 +8,7 @@ class WorkApi(Resource):
     @check_exceptions
     def get(self):
 
-        app.log.info(status=200, message='/working esta ok.')
+        app.app.logger.info('/working esta ok.')
 
         work_list = []
 

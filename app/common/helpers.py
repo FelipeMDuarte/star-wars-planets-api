@@ -4,9 +4,9 @@ from jsonschema import validate, ValidationError
 import subprocess
 import app
 from threading import Thread
-import BaseError
 from hamcrest import assert_that, has_key, has_entry, equal_to
 from logging.config import dictConfig
+from .exceptions import BaseError, InvalidInputError, GeneralUnexpectedError
 
 
 class ValidateInput(object):
@@ -20,11 +20,9 @@ class ValidateInput(object):
                     raise ValidationError('No json provided.')
                 validate(request.json, json.loads(self.json_schema))
             except ValidationError as ex:
-                raise BaseError(
-                    code="IIE001",
-                    message="URL: {} - Body: {} - Error: {}".format(
-                        request.full_path, request.data.decode("utf-8"), str(ex)),
-                    http_status=400)
+                raise InvalidInputError('URL: ' + request.full_path
+                                        + ' - BODY: ' + request.data.decode("utf-8") + ''
+                                        + ' - ERROR: ' + str(ex))
             return original_func(*args, **kwargs)
 
         return wrappee
@@ -56,16 +54,14 @@ def check_exceptions(f):
         try:
             return f(*args, **kwargs)
         except BaseError as ex:
-            app.logger.error(ex.code, ex.http_status, message=ex.message)
+            app.app.logger.error("Error code: {} - Http status: {} - Message: {}".format(
+                ex.code, ex.http_status, ex.message))
             return ex.get_friendly_message_json(), ex.http_status
         except Exception as ex:
-            ex = BaseError(
-                code="GUE001",
-                message="General Unexpected Error in service {}. Stacktrade: {}.".format(
-                    app.app.config['SERVICE_NAME'], str(ex)),
-                http_status=400)
-            app.logger.error(ex.code, ex.http_status, message=ex.message)
-            return ex.message, ex.http_status
+            ex = GeneralUnexpectedError(app.app.config['SERVICE_NAME'], str(ex))
+            app.app.logger.error("Error code: {} - Http status: {} - Message: {}".format(
+                ex.code, ex.http_status, ex.message))
+            return ex.get_friendly_message_json(), ex.http_status
 
     return wrapper
 
@@ -93,7 +89,7 @@ def log_request(f):
         if request.data:
             message += str(request.data)
 
-        app.logger.info(200, message='Request recebido: ' + message)
+        app.app.logger.info('Request recebido: ' + message)
         response = f(*args, **kwargs)
         return response
     return wrapper
