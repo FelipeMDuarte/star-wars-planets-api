@@ -3,6 +3,7 @@ from flask import Flask
 from config import config
 from flask_restful import Api
 from .common import dictConfig
+from flask_pymongo import PyMongo
 from .dependencies_api import DependencyApi
 from .services import ServiceApi, HealthApi, WorkApi, InfoApi, PlanetsApi
 
@@ -14,6 +15,8 @@ app = Flask(__name__)
 app.config.from_object(config[config_name])
 
 api = Api(app, prefix="/api")
+
+mongodb = PyMongo(app)
 
 dependency_api = DependencyApi(app.config['DEPENDENCY_API_A_URL'])
 another_dependency_api = DependencyApi(app.config['DEPENDENCY_API_B_URL'])
