@@ -1,8 +1,7 @@
 from time import sleep
 from flask_restful import Resource
-from app.common import check_exceptions, ValidateInput, process_async
+from app.common import check_exceptions, process_async
 import requests
-from app.common import POST_INPUT_SCHEMA
 
 data = {"table_id": 123, "bill_price": 50.00}
 
@@ -14,7 +13,6 @@ class ServiceApi(Resource):
         return data, 200
 
     @check_exceptions
-    @ValidateInput(POST_INPUT_SCHEMA)
     def post(self):
         response = requests.post('http://0.0.0.0:3000/api/remote', json={})
         return {}, response.status_code
