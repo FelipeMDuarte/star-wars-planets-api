@@ -6,14 +6,14 @@ from app.common import (
     build_response, check_exceptions, POST_INPUT_EXPECTED,
     check_input_json)
 from bson import json_util
+from bson.objectid import ObjectId
 
 
 class PlanetsApi(Resource):
-    def get(self, planet_id=None, planet_name=None):
-        if planet_id:
-            return get_planet_by_id(planet_id)
-        if planet_name:
-            return get_planet_by_name(planet_name)
+
+    def get(self, planet_name_id=None):
+        if planet_name_id:
+            return get_planet_by_name_id(planet_name_id)
         return get_all_planets()  # data, response.status_code
 
     @check_exceptions
@@ -34,23 +34,32 @@ def get_all_planets():
         results = []
         star_wars_db = app.mongodb.db['star_wars_db']
         for item in star_wars_db.find({}):
-            results.append(json.loads(json.dumps(item, default=json_util.default)))
+            results.append(serialize_mongo_result(item))
         return results
     except Exception as ex:
         app.app.logger.info("Exception: " + str(ex))
         raise ex
 
-#
-# def get_planet_by_id():
-#     try:
-#         results = []
-#         star_wars_db = app.mongodb.db['star_wars_db']
-#         for item in star_wars_db.find({}):
-#             results.append(dumps(item))
-#         return results
-#     except Exception as ex:
-#         app.app.logger.info("Exception: " + str(ex))
-#         raise ex
+
+def serialize_mongo_result(item):
+    return json.loads(json.dumps(item, default=json_util.default))
+
+
+def hasNumbers(inputString):
+    return any(char.isdigit() for char in inputString)
+
+
+def get_planet_by_name_id(planet_name_id):
+    try:
+        star_wars_db = app.mongodb.db['star_wars_db']
+        if hasNumbers(planet_name_id):
+            for item in star_wars_db.find({"_id": ObjectId(planet_name_id)}):
+                return serialize_mongo_result(item)
+        for item in star_wars_db.find({"name": planet_name_id}):
+            return serialize_mongo_result(item)
+    except Exception as ex:
+        app.app.logger.info("Exception: " + str(ex))
+        raise ex
 
 
 def save_new_planet(received_json):

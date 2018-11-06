@@ -26,5 +26,4 @@ api.add_resource(HealthApi, "/healthcheck")
 api.add_resource(WorkApi, "/working")
 api.add_resource(InfoApi, "/info")
 api.add_resource(PlanetsApi, "/planets",
-                             "/planets/<int:planet_id>",
-                             "/planets/<string:planet_name>")
+                             "/planets/<string:planet_name_id>")
