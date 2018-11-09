@@ -1,5 +1,6 @@
 import app
 import json
+import requests
 from flask import request
 from flask_restful import Resource
 from app.common import (
@@ -14,7 +15,7 @@ class PlanetsApi(Resource):
     def get(self, planet_name_id=None):
         if planet_name_id:
             return get_planet_by_name_id(planet_name_id)
-        return get_all_planets()  # data, response.status_code
+        return get_all_planets()
 
     @check_exceptions
     def post(self):
@@ -68,7 +69,9 @@ def save_new_planet(received_json):
     try:
         app.app.logger.info("Json received: " + json.dumps(received_json))
         star_wars_db = app.mongodb.db['star_wars_db']
-        # TODO Fazer request na starwars api pela quantidade de apariçoes nos filmes
+        json_to_save = dict()
+        json_to_save = received_json
+        json_to_save['films'] = get_films(json_to_save['name'])
         star_wars_db.insert_one(received_json)
         app.app.logger.info("Json saved in the database with id: " + str(received_json['_id']))
     except Exception as ex:
@@ -76,25 +79,53 @@ def save_new_planet(received_json):
         raise ex
     return build_response(200, "Cadastro realizado com sucesso", str(received_json))
 
-def update_planet(received_json, planet_id):
+def get_films(planet_name):
+    response = requests.get("https://swapi.co/api/planets/?search="+planet_name)
+    response = response.json()
+    if response["count"] > 1:
+        raise Exception("Foram achados mais de um planeta com o nome enviado")
+    if response["count"] == 0:
+        raise Exception("Nao foi achado nenhum planeta com o nome enviado")
+    films = len(response['results'][0]['films'])
+    return films
+
+def update_planet(received_json, planet_name_id):
     try:
         app.app.logger.info("Json received: " + json.dumps(received_json))
         star_wars_db = app.mongodb.db['star_wars_db']
-        # TODO Fazer request na starwars api pela quantidade de apariçoes nos filmes
-        star_wars_db.find_one_and_update({"_id":ObjectId(planet_id)},{"$set":received_json})
-        app.app.logger.info("Updated planet in the database with id: " + str(planet_id))
-    except Exception as ex:
-        app.app.logger.info("Exception: " + str(ex))
-        raise ex
-    return build_response(200, "Update realizado com sucesso", "")
+        json_to_save = dict()
+        json_to_save = received_json
+        json_to_save['films'] = get_films(json_to_save['name'])
 
-def delete_planet(planet_id):
-    try:
-        app.app.logger.info("Id recebido para deletar: "+ str(planet_id))
-        star_wars_db = app.mongodb.db['star_wars_db']
-        star_wars_db.remove({"_id":ObjectId(planet_id)})
-        app.app.logger.info("Deleted planet in the database with id: " + str(planet_id))
+        if hasNumbers(planet_name_id):
+            updated = star_wars_db.find_one_and_update({"_id":ObjectId(planet_name_id)},{"$set":received_json})
+        else:
+            updated = star_wars_db.find_one_and_update({"name":planet_name_id},{"$set":received_json})
+        if not updated:
+            app.app.logger.info("Planet not found: " + str(planet_name_id))
+            return build_response(404, "O planeta enviado nao foi encontrado: " + str(planet_name_id), "")
+        app.app.logger.info("Updated planet in the database: " + str(planet_name_id))
+        return build_response(200, "Update realizado com sucesso", "")
+
     except Exception as ex:
         app.app.logger.info("Exception: " + str(ex))
         raise ex
-    return build_response(200, "Delete realizado com sucesso", "")
+
+
+def delete_planet(planet_name_id):
+    try:
+        app.app.logger.info("Dado recebido para deletar: "+ str(planet_name_id))
+        star_wars_db = app.mongodb.db['star_wars_db']
+        if hasNumbers(planet_name_id):
+            deleted = star_wars_db.remove({"_id":ObjectId(planet_name_id)})
+        else:
+            deleted = star_wars_db.remove({"name":planet_name_id})
+        print("@@@@ - ",deleted)
+        if deleted['n'] == 0:
+            app.app.logger.info("Planet not found: " + str(planet_name_id))
+            return build_response(404, "O planeta enviado nao foi encontrado: " + str(planet_name_id), "")
+        app.app.logger.info("Deleted planet in the database: " + str(planet_name_id))
+        return build_response(200, "Delete realizado com sucesso", "")
+    except Exception as ex:
+        app.app.logger.info("Exception: " + str(ex))
+        raise ex

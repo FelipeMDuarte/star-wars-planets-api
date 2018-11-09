@@ -6,7 +6,7 @@ import app
 from threading import Thread
 from hamcrest import assert_that, has_key, has_entry, equal_to
 from logging.config import dictConfig
-from .exceptions import BaseError, InvalidInputError, GeneralUnexpectedError
+from .exceptions import BaseError, InvalidInputError, GeneralError
 
 
 def check_input_json(json_received, json_expected):
@@ -47,7 +47,7 @@ def check_exceptions(f):
                 ex.code, ex.http_status, ex.message))
             return ex.get_friendly_message_json(), ex.http_status
         except Exception as ex:
-            ex = GeneralUnexpectedError(app.app.config['SERVICE_NAME'], str(ex))
+            ex = GeneralError(app.app.config['SERVICE_NAME'], str(ex))
             app.app.logger.error("Error code: {} - Http status: {} - Message: {}".format(
                 ex.code, ex.http_status, ex.message))
             return ex.get_friendly_message_json(), ex.http_status
