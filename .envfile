@@ -1,0 +1,4 @@
+ENVIRONMENT=development
+LOG_PATH=.log/
+SERVICE_NAME=star-wars-planets
+MONGO_URI=mongodb://172.17.0.1:27017/star_wars_db

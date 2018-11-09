@@ -185,3 +185,9 @@ def step_impl(context, key):
         valid_datetime = False
         pass
     assert valid_datetime
+
+
+@Then('the return job json matches')
+def return_json(context):
+    result = context.response.json
+    check_json(json.loads(context.text), result)

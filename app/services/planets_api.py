@@ -97,16 +97,17 @@ def update_planet(received_json, planet_name_id):
 
 def delete_planet(planet_name_id):
     try:
-        app.app.logger.info("Dado recebido para deletar: "+ str(planet_name_id))
+        app.app.logger.info("Dado recebido para deletar: " + str(planet_name_id))
         star_wars_db = app.mongodb.db['star_wars_db']
         if hasNumbers(planet_name_id):
-            deleted = star_wars_db.remove({"_id":ObjectId(planet_name_id)})
+            deleted = star_wars_db.remove({"_id": ObjectId(planet_name_id)})
         else:
-            deleted = star_wars_db.remove({"name":planet_name_id})
-        print("@@@@ - ",deleted)
+            deleted = star_wars_db.remove({"name": planet_name_id})
+        print("@@@@ - ", deleted)
         if deleted['n'] == 0:
             app.app.logger.info("Planet not found: " + str(planet_name_id))
-            return build_response(404, "O planeta enviado nao foi encontrado: " + str(planet_name_id), "")
+            return build_response(
+                404, "O planeta enviado nao foi encontrado: " + str(planet_name_id), "")
         app.app.logger.info("Deleted planet in the database: " + str(planet_name_id))
         return build_response(200, "Delete realizado com sucesso", "")
     except Exception as ex:
@@ -130,4 +131,4 @@ def get_films(planet_name):
     if response["count"] == 0:
         raise Exception("Nao foi achado nenhum planeta com o nome enviado")
     films = len(response['results'][0]['films'])
-    return films
+    return films or 0
