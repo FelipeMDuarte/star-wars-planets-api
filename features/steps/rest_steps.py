@@ -1,6 +1,6 @@
 from app import app
-from behave import *
-from hamcrest import *
+from behave import given, then, when
+from hamcrest import assert_that, equal_to
 from mock import patch
 from jsonschema import validate
 from nose.tools import assert_equal
@@ -24,14 +24,14 @@ def json_body(context):
 
 
 @given('server is down')
-def step_impl(context):
+def step_impl_server_down(context):
     context.patch = patch.object(requests, 'request')
     context.mock = context.patch.start()
     context.mock.side_effect = requests.exceptions.RequestException
 
 
 @given('headers')
-def json_body(context):
+def headers(context):
     context.headers = json.loads(context.text)
 
 
@@ -50,10 +50,15 @@ def mock_configuration(context, method, url, status):
     pass
 
 
-@given('The mock is configured to answer {method} request to {service} service of {url} with status {status} and body')
-def mock_configuration(context, method, service, url, status):
-    mock_configuration = {'status': int(status), 'url': (app.config[url] + service), 'body': context.text,
-                          'method': method}
+@given(
+    'The mock is configured to answer {method} request to {service} \
+    service of {url} with status {status} and body')
+def mock_configuration_service(context, method, service, url, status):
+    mock_configuration = {
+        'status': int(status),
+        'url': (app.config[url] + service),
+        'body': context.text,
+        'method': method}
     if hasattr(context, 'mock_configurations'):
         context.mock_configurations.append(mock_configuration)
     else:
@@ -89,19 +94,19 @@ def json_request(context, method, url):
 
 
 @then('response should be content-type {content_type} and has body')
-def step_impl(context, content_type):
+def response_content_type(context, content_type):
     assert_that(context.response.content_type, equal_to(content_type))
     assert_that(context.response.data, equal_to(context.text))
 
 
 @then('response should be content-type {content_type} and has body {body}')
-def step_impl(context, content_type, body):
+def response_content_type_body(context, content_type, body):
     assert_that(context.response.content_type, equal_to(content_type))
     assert_that(context.response.data, equal_to(body))
 
 
 @then('the response should have body')
-def step_impl(context):
+def response_body(context):
     body = context.text
     check_json(json.loads(body), json.loads(context.response.data))
 
@@ -115,27 +120,26 @@ def match_schema(context, schema_name):
 
 
 @then('the response contains {tag}')
-def step_impl(context, tag):
+def response_contains(context, tag):
     json_response = json.loads(context.response.data)
     assert tag in json_response
 
 
 @then('should have response body')
-def response_body(context):
+def response_body_alt(context):
     json_response = context.response.json
     json_expected = json.loads(context.text)
     check_json(json_expected, json_response)
 
 
-
 @then('the tag {tag} of the response has length {n}')
-def step_impl(context, tag, n):
+def tag_length(context, tag, n):
     assert tag in context.response.json
     assert_equal(len(context.response.json[tag]), int(n))
 
 
 @then('the tag {tag} of type {type} of the response is equal to {n}')
-def step_impl(context, tag, type, n):
+def tag_type_equal(context, tag, type, n):
     assert tag in context.response.json
     if type == "integer":
         assert_equal(context.response.json[tag], int(n))
@@ -157,25 +161,25 @@ def check_exception_error(context, exc, msg):
 
 
 @then('the response json contains an error about {msg}')
-def check_exception_error(context, msg):
+def check_exception_error_about(context, msg):
     error = json.loads(context.response.data)['error']
     assert(error.find(msg) >= 0)
 
 
 @then('the response json contains an error message about {msg}')
-def check_exception_error(context, msg):
+def check_exception_error_message(context, msg):
     error = json.loads(context.response.data)['message']
     assert(error.find(msg) >= 0)
 
 
 @then('should have response body with key {key}')
-def step_impl(context, key):
+def response_body_key(context, key):
     json_response = context.response.json
     assert key in json_response
 
 
 @then('should have valid datetime for the key {key}')
-def step_impl(context, key):
+def response_datetime(context, key):
     json_response = context.response.json
     valid_datetime = True
 
@@ -187,7 +191,7 @@ def step_impl(context, key):
     assert valid_datetime
 
 
-@Then('the return job json matches')
+@then('the return job json matches')
 def return_json(context):
     result = context.response.json
     check_json(json.loads(context.text), result)

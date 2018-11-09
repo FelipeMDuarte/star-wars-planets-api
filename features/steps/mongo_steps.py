@@ -1,5 +1,4 @@
 from behave import Given, then, given
-from hamcrest import *
 import json
 import mongomock
 import app
