@@ -44,14 +44,6 @@ def get_all_planets():
         raise ex
 
 
-def serialize_mongo_result(item):
-    return json.loads(json.dumps(item, default=json_util.default))
-
-
-def hasNumbers(inputString):
-    return any(char.isdigit() for char in inputString)
-
-
 def get_planet_by_name_id(planet_name_id):
     try:
         star_wars_db = app.mongodb.db['star_wars_db']
@@ -79,15 +71,6 @@ def save_new_planet(received_json):
         raise ex
     return build_response(200, "Cadastro realizado com sucesso", str(received_json))
 
-def get_films(planet_name):
-    response = requests.get("https://swapi.co/api/planets/?search="+planet_name)
-    response = response.json()
-    if response["count"] > 1:
-        raise Exception("Foram achados mais de um planeta com o nome enviado")
-    if response["count"] == 0:
-        raise Exception("Nao foi achado nenhum planeta com o nome enviado")
-    films = len(response['results'][0]['films'])
-    return films
 
 def update_planet(received_json, planet_name_id):
     try:
@@ -129,3 +112,22 @@ def delete_planet(planet_name_id):
     except Exception as ex:
         app.app.logger.info("Exception: " + str(ex))
         raise ex
+
+
+def serialize_mongo_result(item):
+    return json.loads(json.dumps(item, default=json_util.default))
+
+
+def hasNumbers(inputString):
+    return any(char.isdigit() for char in inputString)
+
+
+def get_films(planet_name):
+    response = requests.get("https://swapi.co/api/planets/?search="+planet_name)
+    response = response.json()
+    if response["count"] > 1:
+        raise Exception("Foram achados mais de um planeta com o nome enviado")
+    if response["count"] == 0:
+        raise Exception("Nao foi achado nenhum planeta com o nome enviado")
+    films = len(response['results'][0]['films'])
+    return films
