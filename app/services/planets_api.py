@@ -41,6 +41,8 @@ class PlanetsApi(Resource):
 
 def get_all_planets():
     try:
+        app.app.logger.info("Get recebido")
+
         results = []
         star_wars_db = app.mongodb.db['star_wars_db']
         for item in star_wars_db.find({}):
@@ -53,16 +55,29 @@ def get_all_planets():
 
 def get_planet_by_name_id(planet_name_id):
     try:
-        star_wars_db = app.mongodb.db['star_wars_db']
+        app.app.logger.info("Get recebido")
+
         if hasNumbers(planet_name_id):
-            for item in star_wars_db.find({"_id": ObjectId(planet_name_id)}):
-                return serialize_mongo_result(item)
-        for item in star_wars_db.find({"name": planet_name_id.title()}):
-            return serialize_mongo_result(item)
+            get_planet_by_id(planet_name_id)
+
+        get_planet_by_name(planet_name_id)
+
         raise Exception("Nenhum planeta foi encontrado")
     except Exception as ex:
         app.app.logger.info("Exception: " + str(ex))
         raise ex
+
+
+def get_planet_by_id(planet_name_id):
+    star_wars_db = app.mongodb.db['star_wars_db']
+    for item in star_wars_db.find({"_id": ObjectId(planet_name_id)}):
+        return serialize_mongo_result(item)
+
+
+def get_planet_by_name(planet_name_id):
+    star_wars_db = app.mongodb.db['star_wars_db']
+    for item in star_wars_db.find({"name": planet_name_id.title()}):
+        return serialize_mongo_result(item)
 
 
 def save_new_planet(json_received):
@@ -87,12 +102,15 @@ def update_planet(json_received, planet_name_id):
         star_wars_db = app.mongodb.db['star_wars_db']
 
         json_to_save = create_json_to_save(json_received)
+
         if planet_already_exists(json_to_save['name']):
             raise Exception("Esse planeta já está cadastrado")
+
         if hasNumbers(planet_name_id):
             updated = star_wars_db.find_one_and_update({"_id":ObjectId(planet_name_id)},{"$set":json_to_save})
         else:
             updated = star_wars_db.find_one_and_update({"name":planet_name_id.title()},{"$set":json_to_save})
+            
         if not updated:
             app.app.logger.info("Planet not found: " + str(planet_name_id))
             return build_response(404, "O planeta enviado nao foi encontrado: " + str(planet_name_id), "")
@@ -106,7 +124,7 @@ def update_planet(json_received, planet_name_id):
 
 def delete_planet(planet_name_id):
     try:
-        app.app.logger.info("Dado recebido para deletar: " + str(planet_name_id))
+        app.app.logger.info("Delete recebido: " + str(planet_name_id))
         star_wars_db = app.mongodb.db['star_wars_db']
         if hasNumbers(planet_name_id):
             deleted = star_wars_db.remove({"_id": ObjectId(planet_name_id)})
