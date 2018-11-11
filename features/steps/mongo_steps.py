@@ -19,9 +19,9 @@ def reset_json_mock(context):
 
 @Given('I save a job json in the mongodb')
 def json_save_mock(context):
-    json_job = json.loads(context.text)
-    job = app.mongodb.db.autometada_jobs.insert(json_job)
-    context.job_id = str(job)
+    json_planet = json.loads(context.text)
+    planet = app.mongodb.db.star_wars_db.insert(json_planet)
+    context.planet_id = str(planet)
 
 
 @given('I mock pymongo healthcheck')

@@ -11,7 +11,7 @@ Feature: Working service feature
           | post   |
 
 
-  Scenario: mvp-autometadata-jobdata service is not working - MongoDB is down
+  Scenario: mongodb service is not working - MongoDB is down
     When get request to api/working is made
     Then should return status code 200 OK
     Then should have response body
@@ -26,7 +26,7 @@ Feature: Working service feature
     ]
     """
 
-  Scenario: mvp-autometadata-jobdata service is working
+  Scenario: mongodb service is working
     Given I mock pymongo healthcheck
     When get request to api/working is made
     Then should return status code 200 OK

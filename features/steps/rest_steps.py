@@ -9,7 +9,8 @@ from datetime import datetime
 import json
 import httpretty
 import requests
-
+from mock import MagicMock
+import app as application
 
 @given('I am logged in')
 def step_impl(context):
@@ -37,6 +38,11 @@ def headers(context):
 
 @then('should return status code {status_code} {status_name}')
 def response_status_code(context, status_code, status_name):
+    assert_that(context.response.status_code, equal_to(int(status_code)))
+
+
+@then('the response should have status code {status_code} {status_name}')
+def response_status_code_alt(context, status_code, status_name):
     assert_that(context.response.status_code, equal_to(int(status_code)))
 
 
@@ -93,6 +99,60 @@ def json_request(context, method, url):
         pass
 
 
+@when('{method} request to {url} is made getting _id from context')
+def json_request_getting_id(context, method, url):
+    data = None
+    headers = {}
+    content_type = 'application/json'
+    planet_id = context.planet_id if hasattr(context, "planet_id") else "000000000000000000000000"
+    if 'json_body' in context:
+        data = json.dumps(context.json_body)
+
+    if hasattr(context, 'mock_configurations'):
+        for mock_configuration in context.mock_configurations:
+            httpretty.register_uri(method=mock_configuration['method'].upper(),
+                                   uri=mock_configuration['url'],
+                                   status=mock_configuration['status'],
+                                   body=mock_configuration['body'],
+                                   match_querystring=True)
+
+    client = app.test_client()
+
+    response = getattr(client, method)(url+planet_id, data=data, content_type=content_type, headers=headers)
+    context.response = response
+    try:
+        context.response.json = json.loads(context.response.data)
+    except Exception:
+        pass
+
+
+@when('{method} request to {url} is made with starwars api mock')
+def json_request_with_mock(context, method, url):
+    data = None
+    headers = {}
+    content_type = 'application/json'
+    application.services.planets_api.get_films = MagicMock(return_value=2)
+    if 'json_body' in context:
+        data = json.dumps(context.json_body)
+
+    if hasattr(context, 'mock_configurations'):
+        for mock_configuration in context.mock_configurations:
+            httpretty.register_uri(method=mock_configuration['method'].upper(),
+                                   uri=mock_configuration['url'],
+                                   status=mock_configuration['status'],
+                                   body=mock_configuration['body'],
+                                   match_querystring=True)
+
+    client = app.test_client()
+
+    response = getattr(client, method)(url, data=data, content_type=content_type, headers=headers)
+    context.response = response
+    try:
+        context.response.json = json.loads(context.response.data)
+    except Exception:
+        pass
+
+
 @then('response should be content-type {content_type} and has body')
 def response_content_type(context, content_type):
     assert_that(context.response.content_type, equal_to(content_type))
@@ -108,7 +168,12 @@ def response_content_type_body(context, content_type, body):
 @then('the response should have body')
 def response_body(context):
     body = context.text
-    check_json(json.loads(body), json.loads(context.response.data))
+    context_jsons = json.loads(context.response.data)
+    if isinstance(context_jsons,list):
+        for _json in context_jsons:
+            if _json['_id']:
+                del _json['_id']
+    check_json(json.loads(body), context_jsons)
 
 
 @then('the response body matches the schema {schema_name}')
