@@ -5,5 +5,5 @@ import app
 class HealthApi(Resource):
 
     def get(self):
-        app.logger.info(status=200, message="/healthcheck esta ok.")
+        app.app.logger.info("/healthcheck esta ok.")
         return "", 200

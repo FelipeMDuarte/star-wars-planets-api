@@ -1,16 +1,37 @@
-POST_INPUT_SCHEMA = """
-    {
-        "type": "object",
-        "additionalProperties": false,
-        "properties": {
-            "id": {"type": "integer"},
-            "property1": {"type": "string"},
-            "property2": {"type": "string"}
-        },
-        "required": [
-            "id",
-            "property1",
-            "property2"
-        ]
-    }
-    """
+POST_INPUT_EXPECTED = {
+    "name": "Name example",
+    "climate": "Climate example",
+    "terrain": "Terraing example"
+}
+
+PUT_INPUT_EXPECTED = {
+    "name": "Name example",
+    "climate": "Climate example",
+    "terrain": "Terraing example"
+}
+#
+# """
+# {
+#   "type": "object",
+#   "required": [
+#     "name",
+#     "climate",
+#     "terrain",
+#     "total_movies"
+#   ],
+#   "properties": {
+#     "name": {
+#       "type": "string"
+#     },
+#     "climate": {
+#       "type": "string"
+#     },
+#     "terrain": {
+#       "type": "string"
+#     },
+#     "total_movies": {
+#       "type": "integer"
+#     }
+#   }
+# }
+# """
