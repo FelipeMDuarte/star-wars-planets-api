@@ -12,6 +12,7 @@ import requests
 from mock import MagicMock
 import app as application
 
+
 @given('I am logged in')
 def step_impl(context):
     logged_in = True

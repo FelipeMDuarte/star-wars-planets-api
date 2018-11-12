@@ -69,7 +69,7 @@ Feature: Planets api
       """
       {
         "error_code": "GUE000",
-        "message": "Erro no serviço star-wars-api: Esse planeta já está cadastrado.",
+        "message": "Erro no serviço star-wars-planets-api: Esse planeta já está cadastrado.",
         "response": ""
       }
       """
@@ -155,7 +155,7 @@ Feature: Planets api
       """
       {
         "error_code": "GUE000",
-        "message": "Erro no serviço star-wars-api: Nenhum planeta foi encontrado.",
+        "message": "Erro no serviço star-wars-planets-api: Nenhum planeta foi encontrado.",
         "response": ""
       }
       """
@@ -193,7 +193,7 @@ Feature: Planets api
       """
       {
         "error_code": "GUE000",
-        "message": "Erro no serviço star-wars-api: Nenhum planeta foi encontrado.",
+        "message": "Erro no serviço star-wars-planets-api: Nenhum planeta foi encontrado.",
         "response": ""
       }
       """
@@ -317,7 +317,7 @@ Feature: Planets api
       """
       {
         "error_code": "GUE000",
-        "message": "Erro no serviço star-wars-api: Esse planeta já está cadastrado.",
+        "message": "Erro no serviço star-wars-planets-api: Esse planeta já está cadastrado.",
         "response": ""
       }
       """
@@ -432,7 +432,7 @@ Feature: Planets api
       """
       {
         "error_code": "GUE000",
-        "message": "Erro no serviço star-wars-api: Esse planeta já está cadastrado.",
+        "message": "Erro no serviço star-wars-planets-api: Esse planeta já está cadastrado.",
         "response": ""
       }
       """
