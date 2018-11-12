@@ -3,8 +3,7 @@ import os
 
 class Config:
     SERVICE_NAME = os.environ.get('SERVICE_NAME')
-    DEPENDENCY_API_A_URL = os.environ.get('DEPENDENCY_API_A_URL')
-    DEPENDENCY_API_B_URL = os.environ.get('DEPENDENCY_API_B_URL')
+    MONGO_URI = os.environ.get('MONGO_URI')
 
 
 class DevelopmentConfig(Config):

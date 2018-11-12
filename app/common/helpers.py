@@ -6,26 +6,15 @@ import app
 from threading import Thread
 from hamcrest import assert_that, has_key, has_entry, equal_to
 from logging.config import dictConfig
-from .exceptions import BaseError, InvalidInputError, GeneralUnexpectedError
+from .exceptions import BaseError, InvalidInputError, GeneralError
 
 
-class ValidateInput(object):
-    def __init__(self, json_schema):
-        self.json_schema = json_schema
-
-    def __call__(self, original_func):
-        def wrappee(*args, **kwargs):
-            try:
-                if not hasattr(request, 'json'):
-                    raise ValidationError('No json provided.')
-                validate(request.json, json.loads(self.json_schema))
-            except ValidationError as ex:
-                raise InvalidInputError('URL: ' + request.full_path
-                                        + ' - BODY: ' + request.data.decode("utf-8") + ''
-                                        + ' - ERROR: ' + str(ex))
-            return original_func(*args, **kwargs)
-
-        return wrappee
+def check_input_json(json_received, json_expected):
+    for key in json_received.keys():
+        if key not in json_expected.keys():
+            raise InvalidInputError('URL: ' + request.full_path
+                                    + ' - BODY: ' + request.data.decode("utf-8") + ''
+                                    + ' - ERROR: ' + key + ' is missing.')
 
 
 def check_json(json_expected, json_response):
@@ -58,7 +47,7 @@ def check_exceptions(f):
                 ex.code, ex.http_status, ex.message))
             return ex.get_friendly_message_json(), ex.http_status
         except Exception as ex:
-            ex = GeneralUnexpectedError(app.app.config['SERVICE_NAME'], str(ex))
+            ex = GeneralError(app.app.config['SERVICE_NAME'], str(ex))
             app.app.logger.error("Error code: {} - Http status: {} - Message: {}".format(
                 ex.code, ex.http_status, ex.message))
             return ex.get_friendly_message_json(), ex.http_status
@@ -66,12 +55,12 @@ def check_exceptions(f):
     return wrapper
 
 
-def build_response(error_code, message, response, status_code):
+def build_response(code, message, response):
     return {
-        "error_code": error_code,
+        "code": code,
         "message": message,
         "response": response
-    }, status_code
+    }, code
 
 
 def build_working_response(service, status, error_description='', error_code=''):

@@ -14,7 +14,7 @@ class BaseError(BaseException):
             "message": self.message,
             "http_status": self.http_status
         }
-        
+
     def get_friendly_message_json(self):
         return {
             "error_code": self.code,
@@ -32,10 +32,10 @@ class InvalidInputError(BaseError):
             http_status=400)
 
 
-class GeneralUnexpectedError(BaseError):
+class GeneralError(BaseError):
     def __init__(self, service_name, message):
         super().__init__(
             code="GUE000",
-            message="Erro inesperado no {0}: {1}".format(service_name, message),
-            friendly_message="Erro inesperado no {}.".format(service_name),
+            message="Erro no serviço{}: {}".format(service_name, message),
+            friendly_message="Erro no serviço {}: {}.".format(service_name, message),
             http_status=500)
