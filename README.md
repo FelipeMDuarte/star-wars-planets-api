@@ -5,7 +5,7 @@ An API about the planets of the Star Wars universe.
 
 ### Summary
 
-The application is made in Python using the Flask framework and uses MongoDb as database.
+The application is made in Python using the Flask framework and uses MongoDB as database.
 You can run tests with Behave. The tests are found in the /features folder.
 The application can be used localy or by Docker.
 You can use Get, Post, Put and Delete requests to acess the api.
@@ -53,16 +53,16 @@ Use -w for the run the unique scenario.
 
 ## Running with Docker
 
-Build With Docker without env-file
+Build With Docker without env-file (Needs enviroment variables exported)
 ```
 $ docker build -t <Project-name> .
-$ docker run -d -p 8000:80 <Project-name>
+$ docker run -d -p 8000:5000 <Project-name>
 ```
 Build With Docker with an env-file
 Attention: if you build with args, you can't overwrite the env-file when run it
 ```
 $ docker build -t <Project-name> .
-$ docker run -d -p 8000:80 --env-file path/your/file <Project-name>
+$ docker run -d -p 8000:5000 --env-file path/your/file <Project-name>
 ```
 
 If you wanna see it executes in the terminal change `-d` for `-it`

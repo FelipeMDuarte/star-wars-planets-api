@@ -84,16 +84,6 @@ def log_request(f):
     return wrapper
 
 
-def process_async(async_function):
-    def decorator(f):
-        def wrapper(*args, **kwargs):
-            thread = Thread(target=async_function, args=args, kwargs=kwargs)
-            thread.start()
-            return f(*args, **kwargs)
-        return wrapper
-    return decorator
-
-
 def last_commit():
     """Return last commit and your date"""
     return subprocess.check_output(['git', 'log', '-1', '--pretty=format:"%h"'],
