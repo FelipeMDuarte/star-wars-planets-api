@@ -9,7 +9,7 @@ Flask-RESTful==0.3.6
 httpretty==0.9.5
 idna==2.7
 itsdangerous==1.1.0
-Jinja2==2.10
+Jinja2==2.11.3
 jsonschema==2.6.0
 MarkupSafe==1.0
 mock==2.0.0
